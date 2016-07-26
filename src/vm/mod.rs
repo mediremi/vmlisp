@@ -45,8 +45,8 @@ impl VM {
         VM { stack: Stack::new(stack_size) }
     }
 
-    fn byte_to_bytecode(&self, byte: u8) -> Option<Bytecode> {
-        Bytecode::from_u8(byte)
+    fn byte_to_bytecode(&self, byte: u8) -> Bytecode {
+        Bytecode::from_u8(byte).unwrap()
     }
 
     fn execute(&mut self, bytecode: Vec<u8>) {
@@ -58,7 +58,7 @@ impl VM {
                 continue;
             }
 
-            let op = self.byte_to_bytecode(*byte).unwrap();
+            let op = self.byte_to_bytecode(*byte);
 
             match op {
                 Bytecode::PUSH => {

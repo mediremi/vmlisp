@@ -24,16 +24,19 @@ macro_rules! check_args {
         }};
 }
 
+fn is_string(string: &str) -> bool {
+    let as_bytes = string.as_bytes();
+    let quote = '"' as u8;
+    as_bytes[0] == quote && as_bytes[as_bytes.len() - 1] == quote
+}
+
 pub fn instructions_to_bytecode(instructions: Vec<Instruction>) -> Vec<u8> {
     let mut bytecode = vec![];
 
     for instruction in instructions {
         match instruction {
             Instruction::Literal(value) => {
-                let as_bytes = value.as_bytes();
-                let quote = '"' as u8;
-
-                if as_bytes[0] == quote && as_bytes[as_bytes.len() - 1] == quote {
+                if is_string(&value) {
                     for char in value.chars() {
                         bytecode.push(Bytecode::PUSH as u8);
                         bytecode.push(char as u8);
@@ -71,13 +74,15 @@ pub fn instructions_to_bytecode(instructions: Vec<Instruction>) -> Vec<u8> {
                     bytecode.push(Bytecode::DIV as u8);
                 } else if fn_name == "print".to_string() {
                     check_args!("print", args_len, 1);
-                    if first_arg.len() > 0 {
+                    if first_arg.len() > 0 && is_string(&first_arg) {
                         bytecode.push(Bytecode::PUSH as u8);
                         bytecode.push(first_arg.len() as u8);
                     } else {
                         bytecode.push(Bytecode::TOSTRING as u8);
                     }
                     bytecode.push(Bytecode::PRINT as u8);
+                } else {
+                    panic!("No such function: '{}'.", fn_name);
                 }
             }
         }
